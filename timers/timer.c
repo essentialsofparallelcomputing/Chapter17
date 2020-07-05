@@ -2,6 +2,7 @@
 #include <sys/resource.h>
 #include <unistd.h>
 #include "timer.h"
+#include <sys/time.h>
 
 #ifdef __MACH__
 #include <mach/clock.h>

@@ -16,8 +16,10 @@ add_executable(stream_triad stream_triad.c timer.c timer.h)
 add_executable(stream_triad1 stream_triad.c timer.c timer.h)
 set_target_properties(stream_triad1 PROPERTIES DEFINE_SYMBOL -DTIMER1)
 
-add_executable(stream_triad2 stream_triad.c timer.c timer.h)
-set_target_properties(stream_triad2 PROPERTIES DEFINE_SYMBOL -DTIMER2)
+if (APPLE)
+  add_executable(stream_triad2 stream_triad.c timer.c timer.h)
+  set_target_properties(stream_triad2 PROPERTIES DEFINE_SYMBOL -DTIMER2)
+endif (APPLE)
 
 add_executable(stream_triad3 stream_triad.c timer.c timer.h)
 set_target_properties(stream_triad3 PROPERTIES DEFINE_SYMBOL -DTIMER3)
