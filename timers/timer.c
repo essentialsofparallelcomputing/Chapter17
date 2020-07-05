@@ -1,4 +1,3 @@
-#include <sys/time.h>
 #include <stddef.h>
 #include <sys/resource.h>
 #include <unistd.h>
@@ -61,7 +60,7 @@ void cpu_timer_start3(struct timespec *tstart_cpu)
 double cpu_timer_stop3(struct timespec tstart_cpu)
 {
    struct timespec tstop_cpu, tresult;
-   clock_gettime(CLOCK_MONOTONIC, &tstop_cpu);
+   clock_gettime(CLOCK_REALTIME, &tstop_cpu);
    tresult.tv_sec = tstop_cpu.tv_sec - tstart_cpu.tv_sec;
    tresult.tv_nsec = tstop_cpu.tv_nsec - tstart_cpu.tv_nsec;
    double result = (double)tresult.tv_sec + (double)tresult.tv_nsec*1.0e-9;
