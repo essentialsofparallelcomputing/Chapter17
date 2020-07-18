@@ -20,7 +20,7 @@ RUN update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 90\
                         --slave /usr/bin/gcov gcov /usr/bin/gcov-10
 
 RUN apt-get update -q && DEBIAN_FRONTEND=noninteractive \
-    apt-get install -q -y texlive-font-utils texlive-latex-extra libpod-latex-perl gnuplot && \
+    apt-get install -q -y texlive-font-utils texlive-latex-extra libpod-latex-perl gnuplot evince xpdf && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
