@@ -14,5 +14,6 @@ int main(int argc, char *argv[])
    for (int i = 0; i < jmax; i++) {
       x[i] = 0.0;
    }
+   free(x);
    return(0);
 }
