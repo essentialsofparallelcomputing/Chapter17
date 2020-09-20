@@ -113,6 +113,7 @@ RUN apt-get update && \
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive \
     apt-get -qq install -y cmake git vim gcc g++ gfortran software-properties-common likwid wget libzip-dev \
+            gnupg-agent gnupg2 \
             mpich libmpich-dev \
             openmpi-bin openmpi-doc libopenmpi-dev && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
