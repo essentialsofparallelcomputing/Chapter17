@@ -10,13 +10,17 @@ int main(int argc, char *argv[])
 {
   MPI_Init(&argc, &argv);
 
-  int rank;
+  int rank, nprocs;
   MPI_Comm_rank(MPI_COMM_WORLD, &rank);
+  MPI_Comm_size(MPI_COMM_WORLD, &nprocs);
 
   // for multiple files, subdivide communicator and set colors for each set
   MPI_Comm mpi_io_comm = MPI_COMM_NULL;
-  MPI_Comm_dup(MPI_COMM_WORLD, &mpi_io_comm);
-  int ncolors = 1, color = 0, nprocs_color, rank_color;
+  int nfiles = 1;
+  float ranks_per_file = (float)nprocs/(float)nfiles;
+  int color = (int)((float)rank/ranks_per_file);
+  MPI_Comm_split(MPI_COMM_WORLD, color, rank, &mpi_io_comm);
+  int nprocs_color, rank_color;
   MPI_Comm_size(mpi_io_comm, &nprocs_color);
   MPI_Comm_rank(mpi_io_comm, &rank_color);
   int row_color = 1, col_color = rank_color;
@@ -25,7 +29,7 @@ int main(int argc, char *argv[])
   MPI_Comm_split(mpi_io_comm, col_color, rank_color, &mpi_col_comm);
 
   // set the dimensions of our data array and the number of ghost cells
-  int ndim = 2, ng = 2, ny = 1000, nx = 1000;
+  int ndims = 2, ng = 2, ny = 10, nx = 10;
   int global_subsizes[] = {ny, nx};
 
   int ny_offset = 0, nx_offset = 0;
@@ -49,11 +53,11 @@ int main(int argc, char *argv[])
   }
 
   MPI_Datatype memspace = MPI_DATATYPE_NULL, filespace = MPI_DATATYPE_NULL;
-  mpi_io_file_init(ng, global_sizes, global_subsizes, global_offsets,
+  mpi_io_file_init(ng, ndims, global_sizes, global_subsizes, global_offsets,
       &memspace, &filespace);
 
   char filename[30];
-  if (ncolors > 1) {
+  if (nfiles > 1) {
     sprintf(filename,"example_%02d.data",color);
   } else {
     sprintf(filename,"example.data");
@@ -67,7 +71,6 @@ int main(int argc, char *argv[])
 
   mpi_io_file_finalize(&memspace, &filespace);
 
-/*
   if (rank == 0) printf("Verifying  checkpoint\n");
 
   int ierr = 0;
@@ -99,7 +102,6 @@ int main(int argc, char *argv[])
        printf("\n");
      }   
   }
-*/
 
   free(data);
   free(data_restore);
