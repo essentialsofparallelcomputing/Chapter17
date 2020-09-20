@@ -13,8 +13,8 @@ dmalloc:
 
 Archer:
 	git clone https://github.com/spack/spack.git && export SPACK_ROOT=`pwd`/spack && \
-	export PATH=$SPACK_ROOT/bin:$PATH && spack install archer && \
-	mkdir build && cd build && cmake .. && make && ./stencil
+	export PATH=${SPACK_ROOT}/bin:${PATH} && spack install archer && \
+	cd Archer && mkdir build && cd build && cmake .. && make && ./stencil
 
 Darshan:
 	cd MPI_IO_Examples/mpi_io_block2d && mkdir build && cd build && cmake .. && make && \
@@ -24,3 +24,4 @@ clean:
 	rm -rf timers/build
 	cd DrMemory && make clean
 	cd Dmalloc && make clean
+	rm -rf spack && rm -rf Archer/build
