@@ -3,7 +3,7 @@ All: Timers DrMemory dmalloc Archer Darshan
 .PHONY: Timers DrMemory dmalloc Archer
 
 Timers:
-	cd timers && mkdir build & cd build && cmake .. && make && ./runit.sh
+	cd timers && mkdir build && cd build && cmake .. && make && ../runit.sh
 
 DrMemory:
 	cd DrMemory && make && drmemory -- memoryexample
@@ -13,7 +13,7 @@ dmalloc:
 
 Archer:
 	git clone https://github.com/spack/spack.git && export SPACK_ROOT=`pwd`/spack && \
-	source $SPACK_ROOT/share/spack/setup-env.sh && spack install archer && \
+	export PATH=$SPACK_ROOT/bin:$PATH && spack install archer && \
 	mkdir build && cd build && cmake .. && make && ./stencil
 
 Darshan:
