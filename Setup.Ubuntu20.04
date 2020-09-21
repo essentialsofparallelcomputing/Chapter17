@@ -1,0 +1,74 @@
+#!/bin/sh
+# Sets up Ubuntu 20.04 from bare-bones installation 
+# Comment out what you don't need or run line-by-line, manually
+sudo apt-get -qq update && \
+DEBIAN_FRONTEND=noninteractive \
+sudo apt-get -qq install -y cmake make git vim gcc g++ gfortran software-properties-common wget gnupg likwid \
+             mpich libmpich-dev \
+             openmpi-bin openmpi-doc libopenmpi-dev
+
+sudo apt-get -qq install -y gcc-10 g++-10 gfortran-10
+
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-9 70 \
+                         --slave /usr/bin/g++ g++ /usr/bin/g++-9 \
+                         --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-9 \
+                         --slave /usr/bin/gcov gcov /usr/bin/gcov-9
+
+sudo update-alternatives --install /usr/bin/gcc gcc /usr/bin/gcc-10 90 \
+                         --slave /usr/bin/g++ g++ /usr/bin/g++-10 \
+                         --slave /usr/bin/gfortran gfortran /usr/bin/gfortran-10 \
+                         --slave /usr/bin/gcov gcov /usr/bin/gcov-10
+
+sudo chmod u+s /usr/bin/update-alternatives
+
+sudo apt-get -qq update && \
+    DEBIAN_FRONTEND=noninteractive \
+ sudo apt-get -qq install -y texlive-font-utils texlive-latex-extra libpod-latex-perl gnuplot evince
+
+# Installing dmalloc with a package manager
+sudo apt-get -qq update && \
+sudo apt-get -qq install -y libdmalloc-dev
+
+# Installing dmalloc manually
+sudo wget -q https://dmalloc.com/releases/dmalloc-5.5.2.tgz && \
+    tar -xzf dmalloc-5.5.2.tgz && \
+    cd dmalloc-5.5.2/ && \
+    ./configure && make && make install
+
+# Intel tools
+sudo wget -q https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
+sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
+sudo rm -f GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
+sudo echo "deb https://apt.repos.intel.com/oneapi all main" >> /etc/apt/sources.list.d/oneAPI.list
+sudo echo "deb [trusted=yes arch=amd64] https://repositories.intel.com/graphics/ubuntu bionic main" >> /etc/apt/sources.list.d/intel-graphics.list
+sudo apt-get update && \
+sudo apt-get -qq install -y intel-oneapi-advisor \
+                    intel-oneapi-vtune \
+                    intel-oneapi-inspector
+
+# Installing AMD uProf -- requires a manual process
+# Download from https://developer.amd.com/amd-uprof/. Scroll down to bottom of page and select .deb file. Accept EULA and download will start.
+#sudo dpkg --install amduprof_x.y-z_amd64.deb
+
+# Nvidia tools
+sudo wget -q https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-repo-ubuntu1804_10.2.89-1_amd64.deb
+sudo dpkg -i cuda-repo-ubuntu1804_10.2.89-1_amd64.deb
+sudo apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub
+sudo apt-get update && \
+sudo apt-get -qq install -y cuda-nvprof-10-2 \
+                    cuda-nsight-systems-10-2 cuda-nsight-compute-10-2
+
+# CodeXL
+sudo wget -q https://github.com/GPUOpen-Archive/CodeXL/releases/download/v2.6/codexl-2.6-302.x86_64.rpm
+
+sudo wget -q https://github.com/DynamoRIO/drmemory/releases/download/release_2.3.0/DrMemory-Linux-2.3.0-1.tar.gz
+sudo tar -xzf DrMemory-Linux-2.3.0-1.tar.gz && rm -rf DrMemory-Linux-2.3.0-1.tar.gz
+
+sudo wget -q ftp://ftp.mcs.anl.gov/pub/darshan/releases/darshan-3.2.1.tar.gz 
+sudo tar -xzf darshan-3.2.1.tar.gz && cd darshan-3.2.1/darshan-util && ./configure && make && make install && \
+    cd ../.. && rm -rf darshan-3.2.1 darshan-3.2.1.tar.gz
+
+sudo apt-get clean && rm -rf /var/lib/apt/lists/*
+
+make clean
+make
