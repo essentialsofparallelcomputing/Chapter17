@@ -112,45 +112,45 @@ RUN apt-get update && \
 
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive \
-    apt-get -qq install -y cmake git vim gcc g++ gfortran software-properties-common likwid wget libzip-dev \
-            gnupg-agent gnupg2 \
+    apt-get -qq install -y cmake git vim gcc g++ gfortran wget gnupg \
+            software-properties-common likwid libzip-dev \
             mpich libmpich-dev \
             openmpi-bin openmpi-doc libopenmpi-dev && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# Installing latest GCC compiler (version 10)
-RUN apt-get -qq update && \
-    apt-get -qq install -y gcc-10 g++-10 gfortran-10 && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
-
-RUN update-alternatives \
-      --install /usr/bin/gcc      gcc      /usr/bin/gcc-9       80 \
-      --slave   /usr/bin/g++      g++      /usr/bin/g++-9          \
-      --slave   /usr/bin/gfortran gfortran /usr/bin/gfortran-9     \
-      --slave   /usr/bin/gcov     gcov     /usr/bin/gcov-9      && \
-    update-alternatives \
-      --install /usr/bin/gcc      gcc      /usr/bin/gcc-10      90 \
-      --slave   /usr/bin/g++      g++      /usr/bin/g++-10         \
-      --slave   /usr/bin/gfortran gfortran /usr/bin/gfortran-10    \
-      --slave   /usr/bin/gcov     gcov     /usr/bin/gcov-10     && \
-    chmod u+s /usr/bin/update-alternatives
-
-RUN apt-get -qq update && \
-    DEBIAN_FRONTEND=noninteractive \
-    apt-get -qq install -y texlive-font-utils texlive-latex-extra libpod-latex-perl gnuplot evince && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
-
-RUN apt-get -qq update && \
-    apt-get -qq install -y libdmalloc-dev && \
-    apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Installing dmalloc manually
-RUN wget -q https://dmalloc.com/releases/dmalloc-5.5.2.tgz && \
-    tar -xzvf dmalloc-5.5.2.tgz && \
-    cd dmalloc-5.5.2/ && \
-    ./configure && make && make install
-
-# Intel tools
+## Installing latest GCC compiler (version 10)
+#RUN apt-get -qq update && \
+#    apt-get -qq install -y gcc-10 g++-10 gfortran-10 && \
+#    apt-get clean && rm -rf /var/lib/apt/lists/*
+#
+#RUN update-alternatives \
+#      --install /usr/bin/gcc      gcc      /usr/bin/gcc-9       80 \
+#      --slave   /usr/bin/g++      g++      /usr/bin/g++-9          \
+#      --slave   /usr/bin/gfortran gfortran /usr/bin/gfortran-9     \
+#      --slave   /usr/bin/gcov     gcov     /usr/bin/gcov-9      && \
+#    update-alternatives \
+#      --install /usr/bin/gcc      gcc      /usr/bin/gcc-10      90 \
+#      --slave   /usr/bin/g++      g++      /usr/bin/g++-10         \
+#      --slave   /usr/bin/gfortran gfortran /usr/bin/gfortran-10    \
+#      --slave   /usr/bin/gcov     gcov     /usr/bin/gcov-10     && \
+#    chmod u+s /usr/bin/update-alternatives
+#
+#RUN apt-get -qq update && \
+#    DEBIAN_FRONTEND=noninteractive \
+#    apt-get -qq install -y texlive-font-utils texlive-latex-extra libpod-latex-perl gnuplot evince && \
+#    apt-get clean && rm -rf /var/lib/apt/lists/*
+#
+#RUN apt-get -qq update && \
+#    apt-get -qq install -y libdmalloc-dev && \
+#    apt-get clean && rm -rf /var/lib/apt/lists/*
+#
+## Installing dmalloc manually
+#RUN wget -q https://dmalloc.com/releases/dmalloc-5.5.2.tgz && \
+#    tar -xzf dmalloc-5.5.2.tgz && \
+#    cd dmalloc-5.5.2/ && \
+#    ./configure && make && make install
+#
+## Intel tools
 #RUN wget -q https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
 #RUN apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
 #RUN rm -f GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
@@ -161,10 +161,10 @@ RUN wget -q https://dmalloc.com/releases/dmalloc-5.5.2.tgz && \
 #                    intel-oneapi-vtune \
 #                    intel-oneapi-inspector && \
 #    apt-get clean && rm -rf /var/lib/apt/lists/*
-
-# Installing AMD uProf -- requires a manual process
-# Download from https://developer.amd.com/amd-uprof/. Scroll down to bottom of page and select .deb file. Accept EULA and download will start.
-#RUN dpkg --install amduprof_x.y-z_amd64.deb
+#
+## Installing AMD uProf -- requires a manual process
+## Download from https://developer.amd.com/amd-uprof/. Scroll down to bottom of page and select .deb file. Accept EULA and download will start.
+##RUN dpkg --install amduprof_x.y-z_amd64.deb
 
 # Nvidia tools
 RUN wget -q https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-repo-ubuntu1804_10.2.89-1_amd64.deb
@@ -175,17 +175,17 @@ RUN apt-get update && \
                     cuda-nsight-systems-10-2 cuda-nsight-compute-10-2 && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-# CodeXL
-RUN wget -q https://github.com/GPUOpen-Archive/CodeXL/releases/download/v2.6/codexl-2.6-302.x86_64.rpm
-
-WORKDIR /project
-RUN wget -q https://github.com/DynamoRIO/drmemory/releases/download/release_2.3.0/DrMemory-Linux-2.3.0-1.tar.gz
-RUN tar -xzvf DrMemory-Linux-2.3.0-1.tar.gz && rm -rf DrMemory-Linux-2.3.0-1.tar.gz
-WORKDIR /tmp
-
-RUN wget -q ftp://ftp.mcs.anl.gov/pub/darshan/releases/darshan-3.2.1.tar.gz 
-RUN tar -xzvf darshan-3.2.1.tar.gz && cd darshan-3.2.1/darshan-util && ./configure && make && make install && \
-    cd ../.. && rm -rf darshan-3.2.1 darshan-3.2.1.tar.gz
+## CodeXL
+#RUN wget -q https://github.com/GPUOpen-Archive/CodeXL/releases/download/v2.6/codexl-2.6-302.x86_64.rpm
+#
+#WORKDIR /project
+#RUN wget -q https://github.com/DynamoRIO/drmemory/releases/download/release_2.3.0/DrMemory-Linux-2.3.0-1.tar.gz
+#RUN tar -xzf DrMemory-Linux-2.3.0-1.tar.gz && rm -rf DrMemory-Linux-2.3.0-1.tar.gz
+#WORKDIR /tmp
+#
+#RUN wget -q ftp://ftp.mcs.anl.gov/pub/darshan/releases/darshan-3.2.1.tar.gz 
+#RUN tar -xzf darshan-3.2.1.tar.gz && cd darshan-3.2.1/darshan-util && ./configure && make && make install && \
+#    cd ../.. && rm -rf darshan-3.2.1 darshan-3.2.1.tar.gz
 
 ########################################################
 # Customization for user and location
@@ -228,6 +228,7 @@ WORKDIR $DOCKER_HOME
 
 USER $DOCKER_USER
 ENV LANG=$DOCKER_LANG.UTF-8
+ENV PATH=${PATH}:/opt/intel/oneapi/advisor/2021.1-beta08/bin64
 ENV PATH=${PATH}:/project/DrMemory-Linux-2.3.0-1/bin64
 
 RUN git clone --recursive https://github.com/essentialsofparallelcomputing/Chapter17.git
