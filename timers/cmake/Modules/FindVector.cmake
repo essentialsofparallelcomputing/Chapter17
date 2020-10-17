@@ -43,6 +43,10 @@
 #
 #       set (CMAKE_C_FLAGS "${CMAKE_C_FLAGS} ${VECTOR_C_FLAGS")
 
+include(CheckCCompilerFlag)
+include(CheckCXXCompilerFlag)
+include(CheckFortranCompilerFlag)
+
 # Set vectorization flags for a few compilers
 if(CMAKE_C_COMPILER_LOADED)
     if ("${CMAKE_C_COMPILER_ID}" STREQUAL "Clang") # using Clang
@@ -91,7 +95,7 @@ if(CMAKE_C_COMPILER_LOADED)
         set(VECTOR_FPMODEL_C_FLAGS "${VECTOR_FPMODEL_C_FLAGS} -fp-model:precise")
 
         set(VECTOR_OPENMP_SIMD_C_FLAGS "${VECTOR_OPENMP_SIMD_C_FLAGS} -qopenmp-simd")
-        set(VECTOR_C_OPTS "${VECTOR_C_OPTS} -xHOST -vecabi=cmdtarget")
+        set(VECTOR_C_OPTS "${VECTOR_C_OPTS} -restrict -xHOST -vecabi=cmdtarget")
         if ("${CMAKE_C_COMPILER_VERSION}" VERSION_GREATER "17.0.4")
             set(VECTOR_C_OPTS "${VECTOR_C_OPTS} -qopt-zmm-usage=high")
         endif ("${CMAKE_C_COMPILER_VERSION}" VERSION_GREATER "17.0.4")
@@ -137,12 +141,19 @@ if(CMAKE_C_COMPILER_LOADED)
 
     elseif (CMAKE_C_COMPILER_ID MATCHES "Cray")
         set(VECTOR_ALIASING_C_FLAGS "${VECTOR_ALIASING_C_FLAGS} -h restrict=a")
-        set(VECTOR_C_OPTS "${VECTOR_C_OPTS} -h vector=3")
+        set(VECTOR_C_OPTS "${VECTOR_C_OPTS} -h vector3")
   
-        set(VECTOR_NOVEC_C_OPT "${VECTOR_NOVEC_C_OPT} -h vector=0")
+        set(VECTOR_NOVEC_C_OPT "${VECTOR_NOVEC_C_OPT} -h vector0")
         set(VECTOR_C_VERBOSE "${VECTOR_C_VERBOSE} -h msgs -h negmsgs -h list=a")
 
     endif()
+
+    CHECK_C_COMPILER_FLAG("${VECTOR_OPENMP_SIMD_C_FLAGS}" HAVE_OPENMP_SIMD)
+    if (HAVE_OPENMP_SIMD)
+       add_definitions(-D_OPENMP_SIMD)
+    else (HAVE_OPENMP_SIMD)
+       unset(VECTOR_OPENMP_SIMD_C_FLAGS)
+    endif (HAVE_OPENMP_SIMD)
 
     set(VECTOR_BASE_C_FLAGS "${VECTOR_ALIASING_C_FLAGS} ${VECTOR_ARCH_C_FLAGS} ${VECTOR_FPMODEL_C_FLAGS}")
     set(VECTOR_NOVEC_C_FLAGS "${VECTOR_BASE_C_FLAGS} ${VECTOR_NOVEC_C_OPT}")
@@ -212,7 +223,7 @@ if(CMAKE_CXX_COMPILER_LOADED)
         set(VECTOR_FPMODEL_CXX_FLAGS "${VECTOR_FPMODEL_CXX_FLAGS} -fp-model:precise")
 
         set(VECTOR_OPENMP_SIMD_CXX_FLAGS "${VECTOR_OPENMP_SIMD_CXX_FLAGS} -qopenmp-simd")
-        set(VECTOR_CXX_OPTS "${VECTOR_CXX_OPTS} -xHOST -vecabi=cmdtarget")
+        set(VECTOR_CXX_OPTS "${VECTOR_CXX_OPTS} -restrict -xHOST -vecabi=cmdtarget")
         if ("${CMAKE_CXX_COMPILER_VERSION}" VERSION_GREATER "17.0.4")
             set(VECTOR_CXX_OPTS "${VECTOR_CXX_OPTS} -qopt-zmm-usage=high")
         endif ("${CMAKE_CXX_COMPILER_VERSION}" VERSION_GREATER "17.0.4")
@@ -253,12 +264,19 @@ if(CMAKE_CXX_COMPILER_LOADED)
 
     elseif (CMAKE_CXX_COMPILER_ID MATCHES "Cray")
         set(VECTOR_ALIASING_CXX_FLAGS "${VECTOR_ALIASING_CXX_FLAGS} -h restrict=a")
-        set(VECTOR_CXX_OPTS "${VECTOR_CXX_OPTS} -h vector=3")
+        set(VECTOR_CXX_OPTS "${VECTOR_CXX_OPTS} -h vector3")
   
-        set(VECTOR_NOVEC_CXX_OPT "${VECTOR_NOVEC_CXX_OPT} -h vector=0")
+        set(VECTOR_NOVEC_CXX_OPT "${VECTOR_NOVEC_CXX_OPT} -h vector0")
         set(VECTOR_CXX_VERBOSE "${VECTOR_CXX_VERBOSE} -h msgs -h negmsgs -h list=a")
 
     endif()
+
+    CHECK_CXX_COMPILER_FLAG("${VECTOR_OPENMP_SIMD_CXX_FLAGS}" HAVE_OPENMP_SIMD)
+    if (HAVE_OPENMP_SIMD)
+       add_definitions(-D_OPENMP_SIMD)
+    else (HAVE_OPENMP_SIMD)
+       unset(VECTOR_OPENMP_SIMD_CXX_FLAGS)
+    endif (HAVE_OPENMP_SIMD)
 
     set(VECTOR_BASE_CXX_FLAGS "${VECTOR_ALIASING_CXX_FLAGS} ${VECTOR_ARCH_CXX_FLAGS} ${VECTOR_FPMODEL_CXX_FLAGS}")
     set(VECTOR_NOVEC_CXX_FLAGS "${VECTOR_BASE_CXX_FLAGS} ${VECTOR_NOVEC_CXX_OPT}")
@@ -368,14 +386,19 @@ if(CMAKE_Fortran_COMPILER_LOADED)
         set(VECTOR_Fortran_VERBOSE "${VECTOR_Fortran_VERBOSE} -qreport")
 
     elseif (CMAKE_Fortran_COMPILER_ID MATCHES "Cray")
-        set(VECTOR_ALIASING_Fortran_FLAGS "${VECTOR_ALIASING_Fortran_FLAGS} -h restrict=a")
-        set(VECTOR_Fortran_OPTS "${VECTOR_Fortran_OPTS} -h vector=3")
+        set(VECTOR_Fortran_OPTS "${VECTOR_Fortran_OPTS} -h vector3")
   
-       set(VECTOR_NOVEC_Fortran_OPT "${VECTOR_NOVEC_Fortran_OPT} -h vector=0")
+       set(VECTOR_NOVEC_Fortran_OPT "${VECTOR_NOVEC_Fortran_OPT} -h vector0")
        set(VECTOR_Fortran_VERBOSE "${VECTOR_Fortran_VERBOSE} -h msgs -h negmsgs -h list=a")
 
     endif()
 
+    CHECK_FORTRAN_COMPILER_FLAG("${VECTOR_OPENMP_SIMD_Fortran_FLAGS}" HAVE_OPENMP_SIMD)
+    if (HAVE_OPENMP_SIMD)
+       add_definitions(-D_OPENMP_SIMD)
+    else (HAVE_OPENMP_SIMD)
+       unset(VECTOR_OPENMP_SIMD_Fortran_FLAGS)
+    endif (HAVE_OPENMP_SIMD)
 
     set(VECTOR_BASE_Fortran_FLAGS "${VECTOR_ALIASING_Fortran_FLAGS} ${VECTOR_ARCH_Fortran_FLAGS} ${VECTOR_FPMODEL_Fortran_FLAGS}")
     set(VECTOR_NOVEC_Fortran_FLAGS "${VECTOR_BASE_Fortran_FLAGS} ${VECTOR_NOVEC_Fortran_OPT}")
