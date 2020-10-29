@@ -33,7 +33,7 @@ ENV LC_ALL=$DOCKER_LANG.UTF-8
 RUN apt-get -qq update && \
     DEBIAN_FRONTEND=noninteractive \
     apt-get -qq install -y cmake git vim gcc g++ gfortran wget gnupg \
-            software-properties-common likwid libzip-dev \
+            software-properties-common likwid libzip-dev libhtml-parser-perl \
             mpich libmpich-dev \
             openmpi-bin openmpi-doc libopenmpi-dev && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
@@ -80,6 +80,9 @@ RUN echo "deb [trusted=yes arch=amd64] https://repositories.intel.com/graphics/u
 RUN apt-get update && \
     apt-get -qq install -y intel-oneapi-advisor \
                     intel-oneapi-vtune \
+                    intel-oneapi-icc \
+                    intel-oneapi-ifort \
+                    intel-oneapi-openmp \
                     intel-oneapi-inspector && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
@@ -87,13 +90,12 @@ RUN apt-get update && \
 # Download from https://developer.amd.com/amd-uprof/. Scroll down to bottom of page and select .deb file. Accept EULA and download will start.
 #RUN dpkg --install amduprof_x.y-z_amd64.deb
 
-# Nvidia tools
-RUN wget -q https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-repo-ubuntu1804_10.2.89-1_amd64.deb
-RUN dpkg -i cuda-repo-ubuntu1804_10.2.89-1_amd64.deb
-RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub
-RUN apt-get update && \
-    apt-get -qq install -y cuda-nvprof-10-2 \
-                    cuda-nsight-systems-10-2 cuda-nsight-compute-10-2 && \
+# Nvidia GPU software for computation
+# See https://docs.nvidia.com/hpc-sdk/index.html for Nvidia install instructions
+RUN wget --no-verbose https://developer.download.nvidia.com/hpc-sdk/20.9/nvhpc-20-9_20.9_amd64.deb && \
+    wget --no-verbose https://developer.download.nvidia.com/hpc-sdk/20.9/nvhpc-2020_20.9_amd64.deb && \
+    DEBIAN_FRONTEND=noninteractive \
+    apt-get install -y ./nvhpc-20-9_20.9_amd64.deb ./nvhpc-2020_20.9_amd64.deb && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
 # CodeXL
@@ -113,9 +115,24 @@ ENV PATH=${PATH}:/project/DrMemory-Linux-2.3.0-1/bin64
 
 RUN groupadd chapter17 && useradd -m -s /bin/bash -g chapter17 chapter17
 
+RUN usermod -a -G video chapter17
+
 WORKDIR /home/chapter17
 RUN chown -R chapter17:chapter17 /home/chapter17
 USER chapter17
+
+ENV LANG='en_US.UTF-8'
+ENV DISPLAY=:0
+ENV NVIDIA_VISIBLE_DEVICES=all
+ENV NVIDIA_DRIVER_CAPABILITIES=display,graphics,utility,compute
+
+RUN source /opt/intel/oneapi/setvars.sh
+#ENV PATH=${PATH}:/opt/intel/oneapi/compiler/latest/linux/bin/intel64
+#ENV PATH=${PATH}:/opt/intel/oneapi/compiler/latest/linux/bin
+#ENV PATH=${PATH}:/opt/intel/oneapi/advisor/latest/bin64
+#ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/opt/intel/oneapi/compiler/latest/linux/compiler/lib/intel64_lin:/opt/intel/oneapi/compiler/latest/linux/lib
+
+ENV PATH=${PATH}:/project/DrMemory-Linux-2.3.0-1/bin64
 
 RUN git clone --recursive https://github.com/essentialsofparallelcomputing/Chapter17.git
 

@@ -96,6 +96,7 @@ RUN curl -O https://bootstrap.pypa.io/get-pip.py && \
 # Also, fix issue with Shift-Tab not working
 # https://askubuntu.com/questions/839842/vnc-pressing-shift-tab-tab-only
 RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive \
     apt-get install -y libxtst-dev libssl-dev libjpeg-dev && \
     \
     mkdir -p /tmp/x11vnc-0.9.14 && \
@@ -113,79 +114,82 @@ RUN apt-get update && \
 RUN apt-get update && \
     DEBIAN_FRONTEND=noninteractive \
     apt-get -qq install -y cmake git vim gcc g++ gfortran wget gnupg \
-            software-properties-common likwid libzip-dev \
+            software-properties-common likwid libzip-dev libhtml-parser-perl \
             mpich libmpich-dev \
             openmpi-bin openmpi-doc libopenmpi-dev && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-## Installing latest GCC compiler (version 10)
-#RUN apt-get -qq update && \
-#    apt-get -qq install -y gcc-10 g++-10 gfortran-10 && \
-#    apt-get clean && rm -rf /var/lib/apt/lists/*
-#
-#RUN update-alternatives \
-#      --install /usr/bin/gcc      gcc      /usr/bin/gcc-9       80 \
-#      --slave   /usr/bin/g++      g++      /usr/bin/g++-9          \
-#      --slave   /usr/bin/gfortran gfortran /usr/bin/gfortran-9     \
-#      --slave   /usr/bin/gcov     gcov     /usr/bin/gcov-9      && \
-#    update-alternatives \
-#      --install /usr/bin/gcc      gcc      /usr/bin/gcc-10      90 \
-#      --slave   /usr/bin/g++      g++      /usr/bin/g++-10         \
-#      --slave   /usr/bin/gfortran gfortran /usr/bin/gfortran-10    \
-#      --slave   /usr/bin/gcov     gcov     /usr/bin/gcov-10     && \
-#    chmod u+s /usr/bin/update-alternatives
-#
-#RUN apt-get -qq update && \
-#    DEBIAN_FRONTEND=noninteractive \
-#    apt-get -qq install -y texlive-font-utils texlive-latex-extra libpod-latex-perl gnuplot evince && \
-#    apt-get clean && rm -rf /var/lib/apt/lists/*
-#
-#RUN apt-get -qq update && \
-#    apt-get -qq install -y libdmalloc-dev && \
-#    apt-get clean && rm -rf /var/lib/apt/lists/*
-#
-## Installing dmalloc manually
-#RUN wget -q https://dmalloc.com/releases/dmalloc-5.5.2.tgz && \
-#    tar -xzf dmalloc-5.5.2.tgz && \
-#    cd dmalloc-5.5.2/ && \
-#    ./configure && make && make install
-#
-## Intel tools
-#RUN wget -q https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
-#RUN apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
-#RUN rm -f GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
-#RUN echo "deb https://apt.repos.intel.com/oneapi all main" >> /etc/apt/sources.list.d/oneAPI.list
-#RUN echo "deb [trusted=yes arch=amd64] https://repositories.intel.com/graphics/ubuntu bionic main" >> /etc/apt/sources.list.d/intel-graphics.list
-#RUN apt-get update && \
-#    apt-get -qq install -y intel-oneapi-advisor \
-#                    intel-oneapi-vtune \
-#                    intel-oneapi-inspector && \
-#    apt-get clean && rm -rf /var/lib/apt/lists/*
-#
-## Installing AMD uProf -- requires a manual process
-## Download from https://developer.amd.com/amd-uprof/. Scroll down to bottom of page and select .deb file. Accept EULA and download will start.
-##RUN dpkg --install amduprof_x.y-z_amd64.deb
-
-# Nvidia tools
-RUN wget -q https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/cuda-repo-ubuntu1804_10.2.89-1_amd64.deb
-RUN dpkg -i cuda-repo-ubuntu1804_10.2.89-1_amd64.deb
-RUN apt-key adv --fetch-keys https://developer.download.nvidia.com/compute/cuda/repos/ubuntu1804/x86_64/7fa2af80.pub
-RUN apt-get update && \
-    apt-get -qq install -y cuda-nvprof-10-2 \
-                    cuda-nsight-systems-10-2 cuda-nsight-compute-10-2 && \
+# Installing latest GCC compiler (version 10)
+RUN apt-get -qq update && \
+    apt-get -qq install -y gcc-10 g++-10 gfortran-10 && \
     apt-get clean && rm -rf /var/lib/apt/lists/*
 
-## CodeXL
-#RUN wget -q https://github.com/GPUOpen-Archive/CodeXL/releases/download/v2.6/codexl-2.6-302.x86_64.rpm
-#
-#WORKDIR /project
-#RUN wget -q https://github.com/DynamoRIO/drmemory/releases/download/release_2.3.0/DrMemory-Linux-2.3.0-1.tar.gz
-#RUN tar -xzf DrMemory-Linux-2.3.0-1.tar.gz && rm -rf DrMemory-Linux-2.3.0-1.tar.gz
-#WORKDIR /tmp
-#
-#RUN wget -q ftp://ftp.mcs.anl.gov/pub/darshan/releases/darshan-3.2.1.tar.gz 
-#RUN tar -xzf darshan-3.2.1.tar.gz && cd darshan-3.2.1/darshan-util && ./configure && make && make install && \
-#    cd ../.. && rm -rf darshan-3.2.1 darshan-3.2.1.tar.gz
+RUN update-alternatives \
+      --install /usr/bin/gcc      gcc      /usr/bin/gcc-9       80 \
+      --slave   /usr/bin/g++      g++      /usr/bin/g++-9          \
+      --slave   /usr/bin/gfortran gfortran /usr/bin/gfortran-9     \
+      --slave   /usr/bin/gcov     gcov     /usr/bin/gcov-9      && \
+    update-alternatives \
+      --install /usr/bin/gcc      gcc      /usr/bin/gcc-10      90 \
+      --slave   /usr/bin/g++      g++      /usr/bin/g++-10         \
+      --slave   /usr/bin/gfortran gfortran /usr/bin/gfortran-10    \
+      --slave   /usr/bin/gcov     gcov     /usr/bin/gcov-10     && \
+    chmod u+s /usr/bin/update-alternatives
+
+RUN apt-get -qq update && \
+    DEBIAN_FRONTEND=noninteractive \
+    apt-get -qq install -y texlive-font-utils texlive-latex-extra libpod-latex-perl gnuplot-nox evince && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Installing dmalloc with a package manager
+RUN apt-get -qq update && \
+    apt-get -qq install -y libdmalloc-dev && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Installing dmalloc manually
+RUN wget -q https://dmalloc.com/releases/dmalloc-5.5.2.tgz && \
+    tar -xzf dmalloc-5.5.2.tgz && \
+    cd dmalloc-5.5.2/ && \
+    ./configure && make && make install
+
+# Intel tools
+RUN wget -q https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
+RUN apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
+RUN rm -f GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
+RUN echo "deb https://apt.repos.intel.com/oneapi all main" >> /etc/apt/sources.list.d/oneAPI.list
+RUN echo "deb [trusted=yes arch=amd64] https://repositories.intel.com/graphics/ubuntu bionic main" >> /etc/apt/sources.list.d/intel-graphics.list
+RUN apt-get update && \
+    apt-get -qq install -y intel-oneapi-advisor \
+                    intel-oneapi-vtune \
+                    intel-oneapi-icc \
+                    intel-oneapi-ifort \
+                    intel-oneapi-openmp \
+                    intel-oneapi-inspector && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# Installing AMD uProf -- requires a manual process
+# Download from https://developer.amd.com/amd-uprof/. Scroll down to bottom of page and select .deb file. Accept EULA and download will start.
+#RUN dpkg --install amduprof_x.y-z_amd64.deb
+
+# Nvidia GPU software for computation
+# See https://docs.nvidia.com/hpc-sdk/index.html for Nvidia install instructions
+RUN wget --no-verbose https://developer.download.nvidia.com/hpc-sdk/20.9/nvhpc-20-9_20.9_amd64.deb && \
+    wget --no-verbose https://developer.download.nvidia.com/hpc-sdk/20.9/nvhpc-2020_20.9_amd64.deb && \
+    DEBIAN_FRONTEND=noninteractive \
+    apt-get install -y ./nvhpc-20-9_20.9_amd64.deb ./nvhpc-2020_20.9_amd64.deb && \
+    apt-get clean && rm -rf /var/lib/apt/lists/*
+
+# CodeXL
+RUN wget -q https://github.com/GPUOpen-Archive/CodeXL/releases/download/v2.6/codexl-2.6-302.x86_64.rpm
+
+WORKDIR /project
+RUN wget -q https://github.com/DynamoRIO/drmemory/releases/download/release_2.3.0/DrMemory-Linux-2.3.0-1.tar.gz
+RUN tar -xzf DrMemory-Linux-2.3.0-1.tar.gz && rm -rf DrMemory-Linux-2.3.0-1.tar.gz
+WORKDIR /tmp
+
+RUN wget -q ftp://ftp.mcs.anl.gov/pub/darshan/releases/darshan-3.2.1.tar.gz 
+RUN tar -xzf darshan-3.2.1.tar.gz && cd darshan-3.2.1/darshan-util && ./configure && make && make install && \
+    cd ../.. && rm -rf darshan-3.2.1 darshan-3.2.1.tar.gz
 
 ########################################################
 # Customization for user and location
@@ -211,6 +215,8 @@ RUN groupadd -g $DOCKER_GID $DOCKER_GROUP && \
     echo "$DOCKER_TIMEZONE" > /etc/timezone && \
     ln -s -f /usr/share/zoneinfo/$DOCKER_TIMEZONE /etc/localtime
 
+RUN usermod -a -G video chapter17
+
 ADD image/etc /etc
 ADD image/usr /usr
 ADD image/sbin /sbin
@@ -227,8 +233,18 @@ RUN mkdir -p $DOCKER_HOME/.config/mozilla && \
 WORKDIR $DOCKER_HOME
 
 USER $DOCKER_USER
+
 ENV LANG=$DOCKER_LANG.UTF-8
-ENV PATH=${PATH}:/opt/intel/oneapi/advisor/2021.1-beta08/bin64
+ENV DISPLAY=:0
+ENV NVIDIA_VISIBLE_DEVICES=all
+ENV NVIDIA_DRIVER_CAPABILITIES=display,graphics,utility,compute
+
+#RUN source /opt/intel/oneapi/setvars.sh
+ENV PATH=${PATH}:/opt/intel/oneapi/compiler/latest/linux/bin/intel64
+ENV PATH=${PATH}:/opt/intel/oneapi/compiler/latest/linux/bin
+ENV PATH=${PATH}:/opt/intel/oneapi/advisor/latest/bin64
+ENV LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:/opt/intel/oneapi/compiler/latest/linux/compiler/lib/intel64_lin:/opt/intel/oneapi/compiler/latest/linux/lib
+
 ENV PATH=${PATH}:/project/DrMemory-Linux-2.3.0-1/bin64
 
 RUN git clone --recursive https://github.com/essentialsofparallelcomputing/Chapter17.git

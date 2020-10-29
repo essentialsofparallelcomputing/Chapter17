@@ -27,4 +27,3 @@ clean:
 	cd DrMemory && make clean
 	cd Dmalloc && make clean
 	rm -rf spack && rm -rf Archer/build
-	rm -rf MPI_IO_Examples/mpi_io_block2d/build mpi_io_block2d.darshan
