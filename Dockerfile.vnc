@@ -161,7 +161,7 @@ RUN echo "deb [trusted=yes arch=amd64] https://repositories.intel.com/graphics/u
 RUN apt-get update && \
     apt-get -qq install -y intel-oneapi-advisor \
                     intel-oneapi-vtune \
-                    intel-oneapi-dpcpp-cpp-compiler-pro \
+                    intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic \
                     intel-oneapi-ifort \
                     intel-oneapi-openmp \
                     intel-oneapi-inspector && \
